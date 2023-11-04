@@ -20,9 +20,8 @@ import javafx.scene.text.Text;
 public class MonthCalendar extends BorderPane {
     private static final String[] DAYS = //
             { "monday", "tuesday", "wednesday", "thuesday", "friday", "saturday", "sunday" };
+
     private YearMonth current;
-    private LocalDate first;
-    private LocalDate last;
     private BiFunction<LocalDate, Boolean, Node> drawDay;
     private Function<LocalDate, Node> drawWeek;
 
@@ -40,19 +39,27 @@ public class MonthCalendar extends BorderPane {
         draw(YearMonth.now());
     }
 
+    private void header() {
+        Button btPrev = new Button("Prev");
+        Button btNext = new Button("Next");
+        Text tHeader = new Text(current.getMonth().name() + ", " + current.getYear());
+
+        btPrev.setOnAction(e -> draw(current.minusMonths(1)));
+        btNext.setOnAction(e -> draw(current.plusMonths(1)));
+
+        HBox header = new HBox(10);
+        header.getChildren().addAll(btPrev, tHeader, btNext);
+        header.setAlignment(Pos.CENTER);
+
+        setTop(header);
+        setMargin(header, new Insets(15));
+    }
+
     private void draw(YearMonth month) {
         current = month;
         getChildren().clear();
         header();
         body();
-        footer();
-    }
-
-    private void header() {
-        Text tHeader = new Text(current.getMonth().name() + ", " + current.getYear());
-        setTop(tHeader);
-        setAlignment(tHeader, Pos.CENTER);
-        setMargin(tHeader, new Insets(1));
     }
 
     private void body() {
@@ -81,7 +88,7 @@ public class MonthCalendar extends BorderPane {
         }
 
         setCenter(pane);
-        // setMargin(pane, new Insets(30));
+        setMargin(pane, new Insets(10));
     }
 
     private LocalDate startOfCalendar() {
@@ -92,21 +99,6 @@ public class MonthCalendar extends BorderPane {
     private LocalDate endOfCalendar() {
         var end = current.atDay(current.lengthOfMonth());
         return end.plusDays(6 - end.getDayOfWeek().ordinal());
-    }
-
-    private void footer() {
-        Button btPrev = new Button("Prev");
-        Button btNext = new Button("Next");
-
-        btPrev.setOnAction(e -> draw(current.minusMonths(1)));
-        btNext.setOnAction(e -> draw(current.plusMonths(1)));
-
-        HBox hbFooter = new HBox(10);
-        hbFooter.getChildren().addAll(btPrev, btNext);
-        hbFooter.setAlignment(Pos.CENTER);
-
-        setBottom(hbFooter);
-        setMargin(hbFooter, new Insets(15));
     }
 
 }

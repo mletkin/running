@@ -1,10 +1,15 @@
 package org.mletkin.running.gui;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.mletkin.running.model.Activity;
 import org.mletkin.running.model.Data;
@@ -30,26 +35,37 @@ import javafx.stage.Stage;
  * Main window of the application.
  */
 public class Running extends Application {
-    private Data data = new Data(); // = new Data(DIR);
+    private Data data;
+    private DayDetails dayDetails = new DayDetails();
     private Stage primary;
 
     /**
      * Launches the application.
      *
      * @param args
-     *                 simply ignored
+     *                 first argument is the data directory
      */
     public static void launch(String... args) {
-        Application.launch();
+        Application.launch(args);
+    }
+
+    private Optional<Path> firstParameter() {
+        return Optional.ofNullable(getParameters()) //
+                .map(Parameters::getRaw) //
+                .map(List::getFirst) //
+                .map(Paths::get);
     }
 
     @Override
     public void start(Stage stage) {
+        data = firstParameter().map(Data::new).orElseGet(Data::new);
+
         stage.setTitle("Running");
 
         var root = new BorderPane();
         root.setTop(menu());
         root.setCenter(new MonthCalendar(this::mkDayBox, this::mkWeekBox));
+        root.setRight(dayDetails);
 
         Scene scene = new Scene(root, 900, 500);
 
@@ -59,7 +75,11 @@ public class Running extends Application {
     }
 
     private Node mkDayBox(LocalDate day, boolean active) {
-        var dist = data.runs() //
+        List<Activity> runs = data.runs() //
+                .filter(run -> run.start().toLocalDate().equals(day)) //
+                .collect(Collectors.toList());
+
+        var dist = runs.stream() //
                 .filter(run -> run.start().toLocalDate().equals(day)) //
                 .mapToDouble(run -> run.dist()) //
                 .sum() / 1000;
@@ -83,6 +103,9 @@ public class Running extends Application {
 
         var box = new StackPane();
         box.getChildren().addAll(rectangle, textBox);
+        box.setOnMouseClicked(e -> {
+            dayDetails.setRun(runs.stream().findFirst().orElse(null));
+        });
         return box;
     }
 
