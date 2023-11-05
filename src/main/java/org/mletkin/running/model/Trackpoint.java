@@ -24,11 +24,12 @@ public class Trackpoint {
         return tp.getAltitudeMeters();
     }
 
-    public double distance() {
+    public Double distance() {
         return tp.getDistanceMeters();
     }
 
     public int cadence() {
         return tp.getCadence();
     }
+
 }

@@ -18,14 +18,15 @@ import org.mletkin.running.model.Lap;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -69,8 +70,10 @@ public class Running extends Application {
         root.setTop(menu());
         root.setCenter(new MonthCalendar(this::mkDayBox, this::mkWeekBox, monthSummary));
 
-        var sideBox = new VBox();
-        sideBox.getChildren().addAll(dayDetails, monthSummary);
+        var sideBox = new SplitPane();
+        sideBox.setOrientation(Orientation.VERTICAL);
+        sideBox.getItems().addAll(dayDetails, monthSummary);
+        sideBox.setDividerPositions(0.5);
 
         root.setRight(sideBox);
 
