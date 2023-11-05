@@ -1,6 +1,7 @@
 package org.mletkin.running.gui;
 
 import org.mletkin.running.model.Activity;
+import org.mletkin.running.util.Format;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
@@ -27,10 +28,11 @@ public class DayDetails extends VBox {
     public void setRun(Activity run) {
         clear();
         if (run != null) {
-            add("Start: " + run.start());
-            add("Dist: " + run.dist());
-            add("Time: " + run.time());
-            add("Laps: " + run.laps().count());
+            add(Format.date(run.start()));
+            add(String.format("Start: %s" , Format.time(run.start())));
+            add(String.format("Dist: %.2f km", run.dist() / 1000));
+            add(String.format("Time: %s" , Format.time(run.time())));
+            add(String.format("Laps: %d", run.laps().count()));
         }
     }
 }

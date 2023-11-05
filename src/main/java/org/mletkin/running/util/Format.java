@@ -1,6 +1,8 @@
 package org.mletkin.running.util;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Format {
 
@@ -31,4 +33,17 @@ public class Format {
     public static String m2km(double meter) {
         return String.format("%2.3f", meter / 1000);
     }
+
+    public static String date(LocalDate date) {
+        return date == null ? "--" : date.toString();
+    }
+
+    public static String date(LocalDateTime dateTime) {
+        return date(dateTime.toLocalDate());
+    }
+
+    public static String time(LocalDateTime dateTime) {
+        return dateTime == null ? "--" : dateTime.toLocalTime().toString();
+    }
+
 }

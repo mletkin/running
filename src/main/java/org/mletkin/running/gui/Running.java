@@ -25,6 +25,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -37,6 +38,7 @@ import javafx.stage.Stage;
 public class Running extends Application {
     private Data data;
     private DayDetails dayDetails = new DayDetails();
+    private MonthSummary monthSummary;
     private Stage primary;
 
     /**
@@ -59,13 +61,18 @@ public class Running extends Application {
     @Override
     public void start(Stage stage) {
         data = firstParameter().map(Data::new).orElseGet(Data::new);
+        monthSummary = new MonthSummary(data);
 
         stage.setTitle("Running");
 
         var root = new BorderPane();
         root.setTop(menu());
-        root.setCenter(new MonthCalendar(this::mkDayBox, this::mkWeekBox));
-        root.setRight(dayDetails);
+        root.setCenter(new MonthCalendar(this::mkDayBox, this::mkWeekBox, monthSummary));
+
+        var sideBox = new VBox();
+        sideBox.getChildren().addAll(dayDetails, monthSummary);
+
+        root.setRight(sideBox);
 
         Scene scene = new Scene(root, 900, 500);
 
@@ -171,6 +178,7 @@ public class Running extends Application {
         File selectedDirectory = directoryChooser.showDialog(primary);
         if (selectedDirectory != null) {
             data = new Data(selectedDirectory.toPath());
+            monthSummary = new MonthSummary(data);
         }
     }
 

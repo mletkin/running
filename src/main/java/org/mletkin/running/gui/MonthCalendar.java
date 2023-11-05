@@ -24,6 +24,7 @@ public class MonthCalendar extends BorderPane {
     private YearMonth current;
     private BiFunction<LocalDate, Boolean, Node> drawDay;
     private Function<LocalDate, Node> drawWeek;
+    private MonthSummary monthSummary;
 
     /**
      * Creates the calendar.
@@ -33,9 +34,10 @@ public class MonthCalendar extends BorderPane {
      * @param drawWeek
      *                     renders the content of a week cell
      */
-    public MonthCalendar(BiFunction<LocalDate, Boolean, Node> drawDay, Function<LocalDate, Node> drawWeek) {
+    public MonthCalendar(BiFunction<LocalDate, Boolean, Node> drawDay, Function<LocalDate, Node> drawWeek,MonthSummary monthSummary) {
         this.drawDay = drawDay;
         this.drawWeek = drawWeek;
+        this.monthSummary = monthSummary;
         draw(YearMonth.now());
     }
 
@@ -51,6 +53,7 @@ public class MonthCalendar extends BorderPane {
         header.getChildren().addAll(btPrev, tHeader, btNext);
         header.setAlignment(Pos.CENTER);
 
+        monthSummary.setMonth(current);
         setTop(header);
         setMargin(header, new Insets(15));
     }
