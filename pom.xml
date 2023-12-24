@@ -12,6 +12,7 @@
         <version.java>21</version.java>
         <version.javafx>21</version.javafx>
         <version.jupiter>5.8.1</version.jupiter>
+        <verrsion.charts>17.1.51</verrsion.charts>
     </properties>
 
     <build>
@@ -50,6 +51,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>eu.hansolo.fx</groupId>
+            <artifactId>charts</artifactId>
+            <version>17.1.51</version>
+        </dependency>
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>

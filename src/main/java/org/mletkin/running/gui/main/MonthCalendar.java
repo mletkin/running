@@ -1,9 +1,7 @@
-package org.mletkin.running.gui;
+package org.mletkin.running.gui.main;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -21,30 +19,24 @@ public class MonthCalendar extends BorderPane {
     private static final String[] DAYS = //
             { "monday", "tuesday", "wednesday", "thuesday", "friday", "saturday", "sunday" };
 
+    private BoxFactory bf;
     private YearMonth current;
-    private BiFunction<LocalDate, Boolean, Node> drawDay;
-    private Function<LocalDate, Node> drawWeek;
-    private MonthSummary monthSummary;
 
     /**
      * Creates the calendar.
      *
-     * @param drawDay
-     *                     renders the content of a day cell
-     * @param drawWeek
-     *                     renders the content of a week cell
+     * @param bf
+     *                       box factory for cell rendering
      */
-    public MonthCalendar(BiFunction<LocalDate, Boolean, Node> drawDay, Function<LocalDate, Node> drawWeek,MonthSummary monthSummary) {
-        this.drawDay = drawDay;
-        this.drawWeek = drawWeek;
-        this.monthSummary = monthSummary;
+    public MonthCalendar(BoxFactory bf) {
+        this.bf = bf;
         draw(YearMonth.now());
     }
 
     private void header() {
         Button btPrev = new Button("Prev");
         Button btNext = new Button("Next");
-        Text tHeader = new Text(current.getMonth().name() + ", " + current.getYear());
+        Node tHeader = bf.monthHeader(current);
 
         btPrev.setOnAction(e -> draw(current.minusMonths(1)));
         btNext.setOnAction(e -> draw(current.plusMonths(1)));
@@ -53,7 +45,6 @@ public class MonthCalendar extends BorderPane {
         header.getChildren().addAll(btPrev, tHeader, btNext);
         header.setAlignment(Pos.CENTER);
 
-        monthSummary.setMonth(current);
         setTop(header);
         setMargin(header, new Insets(15));
     }
@@ -65,8 +56,11 @@ public class MonthCalendar extends BorderPane {
         body();
     }
 
+    /**
+     * Draws the calendar for a given month.
+     */
     private void body() {
-        GridPane pane = new GridPane();
+        var pane = new GridPane();
         pane.setHgap(10);
         pane.setVgap(10);
         pane.setAlignment(Pos.CENTER);
@@ -82,10 +76,10 @@ public class MonthCalendar extends BorderPane {
         var lastDay = endOfCalendar();
         for (LocalDate day = firstDay; !day.isAfter(lastDay); day = day.plusDays(1), count++) {
             var active = day.getMonth() == current.getMonth();
-            var dayNode = drawDay.apply(day, active);
+            var dayNode = bf.mkDayBox(day, active);
             pane.add(dayNode, count % 7, (int) (count / 7) + 1);
             if (count % 7 == 0) {
-                var weekNode = drawWeek.apply(day);
+                var weekNode = bf.mkWeekBox(day);
                 pane.add(weekNode, 8, (int) (count / 7) + 1);
             }
         }

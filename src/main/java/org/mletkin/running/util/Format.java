@@ -46,4 +46,8 @@ public class Format {
         return dateTime == null ? "--" : dateTime.toLocalTime().toString();
     }
 
+    public static String percentage(double value) {
+        return ((int) 100 * value + 0.5) + " %";
+    }
+
 }

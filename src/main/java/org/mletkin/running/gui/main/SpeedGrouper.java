@@ -1,4 +1,4 @@
-package org.mletkin.running.gui;
+package org.mletkin.running.gui.main;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.mletkin.running.model.Activity;
 import org.mletkin.running.model.Lap;
@@ -29,8 +30,16 @@ public class SpeedGrouper {
 
     private Map<Integer, Duration> map = new HashMap<>();
 
+    public record Line(int group, Duration time, double percentage) {
+        // sufficient
+    }
+
+    public SpeedGrouper(List<Activity> runs) {
+        runs.stream().flatMap(Activity::laps).forEach(this::process);
+    }
+
     /**
-     * Create a groupes and fill it from the activity.
+     * Create a groupe and fill it from the activity.
      *
      * @param run
      *                the activity to group
@@ -69,11 +78,27 @@ public class SpeedGrouper {
      * @return group 5, the higher the faster
      */
     private int group(long pace) {
-        if (pace < 240) return 5; // 4min
-        if (pace < 300) return 4; // 5min
-        if (pace < 360) return 3; // 6min
-        if (pace < 420) return 2; // 7min
-        return 1;
+        if (pace < 240)
+         {
+            return 5; // 4min
+        }
+        if (pace < 300)
+         {
+            return 4; // 5min
+        }
+        if (pace < 360)
+         {
+            return 3; // 6min
+        }
+        if (pace < 420)
+         {
+            return 2; // 7min
+        }
+        if (pace < 600)
+         {
+            return 1; // 10min
+        }
+        return 0;
     }
 
     private Duration sum() {
@@ -81,17 +106,17 @@ public class SpeedGrouper {
     }
 
     /**
-     * Get the result as a list of formatted Strings.
+     * Get the result as a list of Line records.
      */
-    public List<String> result() {
+    public Stream<Line> result() {
         var sum = sum();
         return map.entrySet().stream() //
-                .map(e -> mkLine(e, sum)) //
-                .collect(Collectors.toList());
+                .map(e -> mkLine(e, sum));
     }
 
-    private String mkLine(Entry<Integer, Duration> e, Duration complete) {
-        var percent = (int) (100 * e.getValue().toSeconds() / complete.toSeconds() + 0.5);
-        return String.format("%d %s, %d", e.getKey(), Format.time(e.getValue()), percent);
+    private Line mkLine(Entry<Integer, Duration> e, Duration complete) {
+        var percent = 1.0 * e.getValue().toSeconds() / complete.toSeconds();
+        return new Line(e.getKey(), e.getValue(), percent);
     }
+
 }
