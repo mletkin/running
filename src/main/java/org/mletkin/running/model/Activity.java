@@ -2,10 +2,11 @@ package org.mletkin.running.model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.mletkin.garmin.ActivityLapT;
 import org.mletkin.garmin.ActivityT;
 import org.mletkin.running.util.Util;
 
@@ -15,13 +16,24 @@ import org.mletkin.running.util.Util;
 public class Activity {
 
     private ActivityT act;
-    private List<Lap> laps;
+    private List<Lap> laps = new ArrayList<>();
 
     public Activity(ActivityT act) {
         this.act = act;
-        this.laps = act.getLap().stream() //
-                .map(Lap::new) //
-                .collect(Collectors.toList());
+        addLaps(act);
+    }
+
+    private void addLaps(ActivityT act) {
+        Trackpoint last = null;
+        for (var lap : act.getLap()) {
+            last = addLap(lap, last);
+        }
+    }
+
+    private Trackpoint addLap(ActivityLapT lapT, Trackpoint last) {
+        var lap = new Lap(lapT, last);
+        laps.add(lap);
+        return lap.lastTrackpoint();
     }
 
     public String sport() {

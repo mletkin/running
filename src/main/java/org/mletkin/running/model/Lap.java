@@ -2,11 +2,12 @@ package org.mletkin.running.model;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mletkin.garmin.ActivityLapT;
+import org.mletkin.garmin.TrackpointT;
 import org.mletkin.running.util.Util;
 
 /**
@@ -15,17 +16,26 @@ import org.mletkin.running.util.Util;
 public class Lap {
 
     private ActivityLapT actLap;
-    private List<Trackpoint> track;
+    private List<Trackpoint> track = new ArrayList<>();
 
-    public Lap(ActivityLapT actLap) {
+    public Lap(ActivityLapT actLap, Trackpoint starting) {
         this.actLap = actLap;
-        track = addTrack(actLap).collect(Collectors.toList());
+        addTrackpoints(actLap, starting);
     }
 
-    private Stream<Trackpoint> addTrack(ActivityLapT actLap) {
-        return actLap.getTrack().stream() //
-                .flatMap(t -> t.getTrackpoint().stream()) //
-                .map(Trackpoint::new);
+    private void addTrackpoints(ActivityLapT actLap, Trackpoint starting) {
+        Trackpoint last = starting;
+        for (var track : actLap.getTrack()) {
+            for (var tp : track.getTrackpoint()) {
+                last = addTrackpoint(last, tp);
+            }
+        }
+    }
+
+    private Trackpoint addTrackpoint(Trackpoint last, TrackpointT tpt) {
+        var tp = new Trackpoint.Builder(tpt).withPrevious(last).build();
+        track.add(tp);
+        return tp;
     }
 
     public double meter() {
@@ -59,5 +69,9 @@ public class Lap {
 
     public Stream<Trackpoint> track() {
         return track.stream();
+    }
+
+    Trackpoint lastTrackpoint() {
+        return track.isEmpty() ? null : track.getLast();
     }
 }

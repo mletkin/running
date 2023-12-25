@@ -3,8 +3,8 @@ package org.mletkin.running.gui.main;
 import static org.mletkin.running.gui.GuiUtil.max;
 import static org.mletkin.running.gui.GuiUtil.min;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,11 +58,11 @@ public class RunChart extends Group {
 
     private Region mkChart(List<Trackpoint> trackPoints) {
         List<TYChartItem> items0 = stepItems(trackPoints);
-        List<TYChartItem> items1 = paceItems(items0);
+        List<TYChartItem> items1 = paceItems(trackPoints);
 
         var series = List.of( //
-                new XYSeries(items0, ChartType.RIDGE_LINE, "cadence", Color.LIGHTSALMON, Color.RED, true), //
-                new XYSeries(items1, ChartType.RIDGE_LINE, "pace", Color.LIGHTSKYBLUE, Color.BLUE, true) //
+                new XYSeries(items1, ChartType.RIDGE_LINE, "pace", Color.LIGHTSKYBLUE, Color.BLUE, true), //
+                new XYSeries(items0, ChartType.RIDGE_LINE, "dist", Color.LIGHTSALMON, Color.RED, true) //
         );
 
         var pane = new XYPane(series);
@@ -87,22 +87,20 @@ public class RunChart extends Group {
         return axis;
     }
 
-    private List<TYChartItem> paceItems(List<TYChartItem> items) {
-        return items.stream() //
-                .filter(i -> i.getY() > 0.5) //
-                .map(item -> new TYChartItem(item.getT(), 1000 / 60 / item.getY())) //
+    private List<TYChartItem> paceItems(List<Trackpoint> tps) {
+        return tps.stream() //
+                // .filter(tp -> tp.pace().toSeconds() > 0) //
+                .map(tp -> new TYChartItem(tp.time(), top(tp.pace()))) //
                 .collect(Collectors.toList());
     }
 
+    private long top(Duration pace) {
+        var sec = pace.toSeconds();
+        // System.out.println(sec + "s");
+        return sec > 600 ? 600 : sec;
+    }
+
     private List<TYChartItem> stepItems(List<Trackpoint> tps) {
-        List<TYChartItem> result = new ArrayList<>();
-        var dist = 0.0;
-        for (var tp : tps) {
-            if (tp.distance() != null) {
-                result.add(new TYChartItem(tp.time(), tp.distance() - dist));
-                dist = tp.distance();
-            }
-        }
-        return result;
+        return tps.stream().map(tp -> new TYChartItem(tp.time(), tp.deltaDistance())).collect(Collectors.toList());
     }
 }

@@ -3,7 +3,9 @@ package org.mletkin.running.gui.main;
 import java.util.stream.Collectors;
 
 import org.mletkin.running.gui.main.SpeedGrouper.Line;
+import org.mletkin.running.model.Activity;
 import org.mletkin.running.model.Data;
+import org.mletkin.running.model.Lap;
 import org.mletkin.running.util.Format;
 
 import javafx.scene.control.TextArea;
@@ -48,8 +50,28 @@ public class RangeDetails extends TextArea {
             add(String.format("Time: %s", Format.time(sum.time())));
             add(String.format("Laps: %d", sum.laps()));
             add("---");
-            new SpeedGrouper(runs).result().map(this::format).forEach(this::add);
+            addItional(range);
         }
+    }
+
+    private void addItional(Range range) {
+        var sum = new Summarizer();
+        data.runs() //
+                .filter(range::filter) //
+                .flatMap(Activity::laps).flatMap(Lap::track) //
+                .forEach(sum::add);
+
+        add(String.format("Dist: %.2f m", sum.dist()));
+        add(String.format("Time: %s", Format.time(sum.time())));
+        add(String.format("Alt: %.2f/%.2f m", sum.altUp(), sum.altDown()));
+        add("---");
+        var sg = new SpeedGrouper();
+        data.runs() //
+                .filter(range::filter) //
+                .flatMap(Activity::laps).flatMap(Lap::track) //
+                .forEach(sg::process);
+
+        sg.result().map(this::format).forEach(this::add);
     }
 
     private void add(String line) {
