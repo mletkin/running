@@ -1,7 +1,6 @@
 package org.mletkin.running.model;
 
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -29,13 +28,6 @@ public class XmlRead {
         }
     }
 
-    private boolean match(Path path, BasicFileAttributes attr) {
-        if (attr.isRegularFile()) {
-            return true;
-        }
-        return false;
-    }
-
     public TrainingCenterDatabaseT data(Path file) {
         return readFile(file).orElse(null);
     }
@@ -45,16 +37,6 @@ public class XmlRead {
                 .map(TrainingCenterDatabaseT::getActivities) //
                 .map(ActivityListT::getActivity) //
                 .flatMap(List::stream);
-    }
-
-    public Stream<Lap> laps(TrainingCenterDatabaseT data) {
-        return Stream.of(data) //
-                .map(TrainingCenterDatabaseT::getActivities) //
-                .map(ActivityListT::getActivity) //
-                .flatMap(List::stream) //
-                .map(ActivityT::getLap) //
-                .flatMap(List::stream) //
-                .map(Lap::new);
     }
 
     public void printLaps(TrainingCenterDatabaseT data) {
