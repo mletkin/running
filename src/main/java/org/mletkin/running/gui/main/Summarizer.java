@@ -8,7 +8,7 @@ import org.mletkin.running.model.Trackpoint;
 /**
  * Summarize data für a set of {@code Activities}.
  */
-class Summarizer {
+public class Summarizer {
 
     private double dist = 0.0;
     private Duration time = Duration.ZERO;

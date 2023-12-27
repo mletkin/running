@@ -74,4 +74,8 @@ public class Lap {
     Trackpoint lastTrackpoint() {
         return track.isEmpty() ? null : track.getLast();
     }
+
+    public double deltaAlt() {
+        return track().mapToDouble(Trackpoint::deltaAltitude).filter(a -> a > 0).sum();
+    }
 }

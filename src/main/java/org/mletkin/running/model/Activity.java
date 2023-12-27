@@ -1,5 +1,7 @@
 package org.mletkin.running.model;
 
+import static java.util.Optional.ofNullable;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class Activity {
 
     public Activity(ActivityT act) {
         this.act = act;
-        addLaps(act);
+        ofNullable(act).ifPresent(this::addLaps);
     }
 
     private void addLaps(ActivityT act) {

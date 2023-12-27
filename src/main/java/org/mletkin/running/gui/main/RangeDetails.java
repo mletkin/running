@@ -1,8 +1,10 @@
 package org.mletkin.running.gui.main;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.mletkin.running.gui.main.SpeedGrouper.Line;
+import org.mletkin.running.gui.prep.Normalizer;
 import org.mletkin.running.model.Activity;
 import org.mletkin.running.model.Data;
 import org.mletkin.running.model.Lap;
@@ -16,6 +18,7 @@ import javafx.scene.control.TextArea;
 public class RangeDetails extends TextArea {
 
     private Data data;
+    private Function<Activity, Activity> convert = new Normalizer()::norm;
 
     /**
      * Creates a detail pane.
@@ -36,7 +39,7 @@ public class RangeDetails extends TextArea {
     public void setRange(Range range) {
         var runs = data.runs().filter(range::filter).collect(Collectors.toList());
         var sum = new Summarizer();
-        runs.stream().forEach(sum::add);
+        runs.stream().map(convert).forEach(sum::add);
 
         clear();
         if (sum.runs() > 0) {
@@ -49,6 +52,8 @@ public class RangeDetails extends TextArea {
             add(String.format("Dist: %.2f km", sum.dist()));
             add(String.format("Time: %s", Format.time(sum.time())));
             add(String.format("Laps: %d", sum.laps()));
+            add(String.format("Alt:  %.2f m",
+            runs.stream().flatMap(Activity::laps).mapToDouble(Lap::deltaAlt).sum()));
             add("---");
             addItional(range);
         }
@@ -56,7 +61,7 @@ public class RangeDetails extends TextArea {
 
     private void addItional(Range range) {
         var sum = new Summarizer();
-        data.runs() //
+        data.runs().map(convert) //
                 .filter(range::filter) //
                 .flatMap(Activity::laps).flatMap(Lap::track) //
                 .forEach(sum::add);
