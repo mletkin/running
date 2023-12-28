@@ -5,9 +5,10 @@ import java.util.stream.Collectors;
 
 import org.mletkin.running.gui.main.SpeedGrouper.Line;
 import org.mletkin.running.gui.prep.Normalizer;
-import org.mletkin.running.model.Activity;
 import org.mletkin.running.model.Data;
+import org.mletkin.running.model.Distance;
 import org.mletkin.running.model.Lap;
+import org.mletkin.running.model.Session;
 import org.mletkin.running.util.Format;
 
 import javafx.scene.control.TextArea;
@@ -18,7 +19,7 @@ import javafx.scene.control.TextArea;
 public class RangeDetails extends TextArea {
 
     private Data data;
-    private Function<Activity, Activity> convert = new Normalizer()::norm;
+    private Function<Session, Session> convert = new Normalizer()::norm;
 
     /**
      * Creates a detail pane.
@@ -49,34 +50,51 @@ public class RangeDetails extends TextArea {
             } else {
                 add(String.format("Runs: %d", sum.runs()));
             }
-            add(String.format("Dist: %.2f km", sum.dist()));
+            add(String.format("Dist: %.2f km", sum.dist().km()));
             add(String.format("Time: %s", Format.time(sum.time())));
             add(String.format("Laps: %d", sum.laps()));
-            add(String.format("Alt:  %.2f m",
-            runs.stream().flatMap(Activity::laps).mapToDouble(Lap::deltaAlt).sum()));
+            add(String.format("Alt:  %.2f m", //
+                    runs.stream().flatMap(Session::laps) //
+                            .map(Lap::deltaAlt) //
+                            .reduce(Distance.ZERO, Distance::plus) //
+                            .meter()));
             add("---");
             addItional(range);
+            add("---");
+            addItionalNorm(range);
         }
     }
 
     private void addItional(Range range) {
         var sum = new Summarizer();
-        data.runs().map(convert) //
+        data.runs() //
                 .filter(range::filter) //
-                .flatMap(Activity::laps).flatMap(Lap::track) //
+                .flatMap(Session::laps) //
+                .flatMap(Lap::track) //
                 .forEach(sum::add);
 
-        add(String.format("Dist: %.2f m", sum.dist()));
+        add(String.format("Dist: %.3f km", sum.dist().km()));
         add(String.format("Time: %s", Format.time(sum.time())));
-        add(String.format("Alt: %.2f/%.2f m", sum.altUp(), sum.altDown()));
+        add(String.format("Alt: %.2f/%.2f m", sum.altUp().meter(), sum.altDown().meter()));
         add("---");
         var sg = new SpeedGrouper();
         data.runs() //
                 .filter(range::filter) //
-                .flatMap(Activity::laps).flatMap(Lap::track) //
+                .flatMap(Session::laps).flatMap(Lap::track) //
                 .forEach(sg::process);
 
         sg.result().map(this::format).forEach(this::add);
+    }
+
+    private void addItionalNorm(Range range) {
+        var sum = new Summarizer();
+        data.runs().map(convert) //
+                .filter(range::filter) //
+                .forEach(sum::add);
+
+        add(String.format("Dist: %.3f km", sum.dist().km()));
+        add(String.format("Time: %s", Format.time(sum.time())));
+        add(String.format("Alt: %.2f/%.2f m", sum.altUp().meter(), sum.altDown().meter()));
     }
 
     private void add(String line) {

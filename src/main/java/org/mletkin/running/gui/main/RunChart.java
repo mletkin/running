@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.mletkin.running.model.Activity;
+import org.mletkin.running.model.Session;
 import org.mletkin.running.model.Data;
 import org.mletkin.running.model.Lap;
 import org.mletkin.running.model.Trackpoint;
@@ -44,13 +44,13 @@ public class RunChart extends Group {
         }
     }
 
-    void setChart(List<Activity> act) {
-        var chart = mkChart(act.stream().flatMap(Activity::laps).flatMap(Lap::track).collect(Collectors.toList()));
+    void setChart(List<Session> act) {
+        var chart = mkChart(act.stream().flatMap(Session::laps).flatMap(Lap::track).collect(Collectors.toList()));
         this.getChildren().clear();
         this.getChildren().add(chart);
     }
 
-    void setChart(Activity act) {
+    void setChart(Session act) {
         var chart = mkChart(act.laps().flatMap(Lap::track).collect(Collectors.toList()));
         this.getChildren().clear();
         this.getChildren().add(chart);
@@ -90,7 +90,7 @@ public class RunChart extends Group {
     private List<TYChartItem> paceItems(List<Trackpoint> tps) {
         return tps.stream() //
                 // .filter(tp -> tp.pace().toSeconds() > 0) //
-                .map(tp -> new TYChartItem(tp.time(), top(tp.pace()))) //
+                .map(tp -> new TYChartItem(tp.time(), tp.speed().kmh())) // top(tp.pace()))) //
                 .collect(Collectors.toList());
     }
 
@@ -101,6 +101,6 @@ public class RunChart extends Group {
     }
 
     private List<TYChartItem> stepItems(List<Trackpoint> tps) {
-        return tps.stream().map(tp -> new TYChartItem(tp.time(), tp.deltaDistance())).collect(Collectors.toList());
+        return tps.stream().map(tp -> new TYChartItem(tp.time(), tp.deltaDistance().meter())).collect(Collectors.toList());
     }
 }

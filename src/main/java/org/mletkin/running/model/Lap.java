@@ -11,16 +11,36 @@ import org.mletkin.garmin.TrackpointT;
 import org.mletkin.running.util.Util;
 
 /**
- * Wraps the {@link ActivityLapT} xml element.
+ * Provides the information from an {@link ActivityLapT} xml element.
  */
 public class Lap {
 
-    private ActivityLapT actLap;
+    private LocalDateTime start;
+    private Duration time;
+    private Distance distance;
     private List<Trackpoint> track = new ArrayList<>();
 
-    public Lap(ActivityLapT actLap, Trackpoint starting) {
-        this.actLap = actLap;
-        addTrackpoints(actLap, starting);
+    /**
+     * Creates a new {@code Lap} object.
+     *
+     * @param actLap
+     *                       {@code ActivityLapT} object to fill from
+     * @param preceeding
+     *                       last {@code Trackpoint} from the preceeding lap
+     */
+    public Lap(ActivityLapT actLap, Trackpoint preceeding) {
+        this.distance = Distance.meter(actLap.getDistanceMeters());
+        this.time = Duration.ofMillis((long) actLap.getTotalTimeSeconds() * 1000);
+        this.start = Util.toLocalDateTime(actLap.getStartTime());
+
+        addTrackpoints(actLap, preceeding);
+    }
+
+    /**
+     * Entry point for normalized Laps.
+     */
+    protected Lap() {
+        // intentially left empty
     }
 
     private void addTrackpoints(ActivityLapT actLap, Trackpoint starting) {
@@ -38,35 +58,30 @@ public class Lap {
         return tp;
     }
 
-    public double meter() {
-        return actLap.getDistanceMeters();
+    /**
+     * Returns the distance run in the lap.
+     */
+    public Distance distance() {
+        return distance;
     }
 
-    public long seconds() {
-        return (long) actLap.getTotalTimeSeconds();
-    }
-
-    public long milliSeconds() {
-        return (long) actLap.getTotalTimeSeconds() * 1000;
-    }
-
-    public Duration pace() {
-        return Duration.ofSeconds((long) (milliSeconds() / meter()));
-    }
-
+    /**
+     * Returns the time the session took.
+     */
     public Duration time() {
-        return Duration.ofMillis(milliSeconds());
+        return time;
     }
 
-    public int bpmAvg() {
-        var bpm = actLap.getAverageHeartRateBpm();
-        return bpm == null ? 0 : bpm.getValue();
-    }
-
+    /**
+     * Returns the time the lap started.
+     */
     public LocalDateTime start() {
-        return Util.toLocalDateTime(actLap.getStartTime());
+        return start;
     }
 
+    /**
+     * Returns a {@coede Stream} of all the {@code Trackpoint} objects of the lap.
+     */
     public Stream<Trackpoint> track() {
         return track.stream();
     }
@@ -75,7 +90,13 @@ public class Lap {
         return track.isEmpty() ? null : track.getLast();
     }
 
-    public double deltaAlt() {
-        return track().mapToDouble(Trackpoint::deltaAltitude).filter(a -> a > 0).sum();
+    /**
+     * Returns the total vertical distance "up" in the lap.
+     */
+    public Distance deltaAlt() {
+        return track() //
+                .map(Trackpoint::deltaAltitude) //
+                .filter(Distance::positive) //
+                .reduce(Distance.ZERO, Distance::plus);
     }
 }

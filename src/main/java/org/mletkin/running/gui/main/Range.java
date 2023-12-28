@@ -6,7 +6,7 @@ import java.time.Month;
 import java.time.YearMonth;
 import java.time.temporal.ChronoField;
 
-import org.mletkin.running.model.Activity;
+import org.mletkin.running.model.Session;
 import org.mletkin.running.util.Format;
 
 /**
@@ -64,7 +64,7 @@ public record Range(LocalDate start, LocalDate end, String txt) {
     /**
      * Filter on {@code Activity} objects that start in the range.
      */
-    public boolean filter(Activity act) {
+    public boolean filter(Session act) {
         return filter(act.start().toLocalDate());
     }
 

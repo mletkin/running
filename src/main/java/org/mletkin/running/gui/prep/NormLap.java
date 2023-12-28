@@ -1,14 +1,19 @@
 package org.mletkin.running.gui.prep;
 
-import org.mletkin.garmin.ActivityLapT;
+import org.mletkin.running.model.Distance;
 import org.mletkin.running.model.Lap;
-import org.mletkin.running.model.Trackpoint;
 
-public class NormLap extends Lap{
+public class NormLap extends Lap {
 
-    public NormLap(ActivityLapT actLap, Trackpoint starting) {
-        super(actLap, starting);
-        // TODO Auto-generated constructor stub
+    private Distance deltaAlt;
+
+    NormLap(Distance deltaAlt) {
+        super();
+        this.deltaAlt = deltaAlt;
     }
 
+    @Override
+    public Distance deltaAlt() {
+        return deltaAlt;
+    }
 }

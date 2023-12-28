@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.mletkin.running.model.Activity;
+import org.mletkin.running.model.Session;
 import org.mletkin.running.model.Lap;
 import org.mletkin.running.model.Trackpoint;
 
@@ -31,12 +31,12 @@ public class SpeedGrouper {
         // sufficient
     }
 
-    public void process(Activity run) {
+    public void process(Session run) {
         run.laps().flatMap(Lap::track).forEach(this::process);
     }
 
     public void process(Trackpoint tp) {
-        add(tp.deltaDistance(), tp.deltaTime().getSeconds());
+        add(tp.deltaDistance().meter(), tp.deltaTime().getSeconds());
     }
 
     private void add(double meter, long seconds) {

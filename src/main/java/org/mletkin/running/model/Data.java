@@ -16,7 +16,7 @@ import org.mletkin.garmin.TrainingCenterDatabaseT;
  */
 public class Data {
 
-    private List<Activity> content = List.of();
+    private List<Session> content = List.of();
 
     public Data() {
         // creates an empty container
@@ -34,7 +34,7 @@ public class Data {
                 .map(TrainingCenterDatabaseT::getActivities) //
                 .map(ActivityListT::getActivity) //
                 .flatMap(List::stream) //
-                .map(Activity::new) //
+                .map(Session::new) //
                 .collect(Collectors.toList());
     }
 
@@ -64,7 +64,7 @@ public class Data {
      *
      * @return Stream of all activities
      */
-    public Stream<Activity> runs() {
+    public Stream<Session> runs() {
         return content.stream();
     }
 
@@ -74,7 +74,7 @@ public class Data {
      * @return Stream of all laps
      */
     public Stream<Lap> laps() {
-        return content.stream().flatMap(Activity::laps);
+        return content.stream().flatMap(Session::laps);
     }
 
 }

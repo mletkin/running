@@ -15,19 +15,21 @@ import org.mletkin.running.util.Util;
 public class Trackpoint {
 
     private TrackpointT tp;
-    private double dAlt = 0;
-    private double dDist = 0;
+    private LocalDateTime time;
+    private Distance dAlt = Distance.ZERO;
+    private Distance dDist = Distance.ZERO;
     private Duration dTime = Duration.ZERO;
 
     public Trackpoint(TrackpointT tp) {
+        this.time = Util.toLocalDateTime(tp.getTime());
         this.tp = tp;
     }
 
     public LocalDateTime time() {
-        return Util.toLocalDateTime(tp.getTime());
+        return time;
     }
 
-    public Double altitude() {
+    private Double altitudeMeters() {
         return tp.getAltitudeMeters();
     }
 
@@ -35,15 +37,15 @@ public class Trackpoint {
         return tp.getCadence();
     }
 
-    public Double distance() {
+    private Double distanceMeters() {
         return tp.getDistanceMeters();
     }
 
-    public double deltaAltitude() {
+    public Distance deltaAltitude() {
         return dAlt;
     }
 
-    public double deltaDistance() {
+    public Distance deltaDistance() {
         return dDist;
     }
 
@@ -51,8 +53,8 @@ public class Trackpoint {
         return dTime;
     }
 
-    public Duration pace() {
-        return Duration.ofSeconds((long) (dTime.toMillis() / deltaDistance()));
+    public Speed speed() {
+        return new Speed(dTime, dDist);
     }
 
     static class Builder {
@@ -65,11 +67,11 @@ public class Trackpoint {
 
         Builder withPrevious(Trackpoint last) {
             if (last != null) {
-                if (last.distance() != null && tp.distance() != null) {
-                    tp.dDist = tp.distance() - last.distance();
+                if (last.distanceMeters() != null && tp.distanceMeters() != null) {
+                    tp.dDist = Distance.meter(tp.distanceMeters() - last.distanceMeters());
                 }
-                if (last.altitude() != null && tp.altitude() != null) {
-                    tp.dAlt = tp.altitude() - last.altitude();
+                if (last.altitudeMeters() != null && tp.altitudeMeters() != null) {
+                    tp.dAlt = Distance.meter(tp.altitudeMeters() - last.altitudeMeters());
                 }
                 tp.dTime = Duration.between(last.time(), tp.time());
             }

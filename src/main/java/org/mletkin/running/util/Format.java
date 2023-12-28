@@ -27,13 +27,6 @@ public class Format {
         return String.format("%02d:%02d:%02d", hrs, min, sec);
     }
 
-    /**
-     * Format meter to km, with 3 decimals
-     */
-    public static String m2km(double meter) {
-        return String.format("%2.3f", meter / 1000);
-    }
-
     public static String date(LocalDate date) {
         return date == null ? "--" : date.toString();
     }

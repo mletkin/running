@@ -55,8 +55,8 @@ class BoxFactory {
     }
 
     private String dayText(LocalDate day, Summarizer sum) {
-        return sum.dist() > 0.001 //
-                ? String.format("%d\n%.3f km\n%s", day.getDayOfMonth(), sum.dist(), Format.time(sum.time()))
+        return sum.dist().meter() > 0.001 //
+                ? String.format("%d\n%.3f km\n%s", day.getDayOfMonth(), sum.dist().km(), Format.time(sum.time()))
                 : String.format("%d\n --", day.getDayOfMonth());
     }
 
@@ -67,8 +67,8 @@ class BoxFactory {
 
     private String weekText(LocalDate day, Summarizer sum) {
         int weekOfYear = day.get(ChronoField.ALIGNED_WEEK_OF_YEAR);
-        var text = sum.dist() > 0.001 //
-                ? String.format("%d\n%.3f km\n%s", weekOfYear, sum.dist(), Format.time(sum.time()))
+        var text = sum.dist().meter() > 0.001 //
+                ? String.format("%d\n%.3f km\n%s", weekOfYear, sum.dist().km(), Format.time(sum.time()))
                 : String.format("%d\n--", weekOfYear);
         return text;
     }
