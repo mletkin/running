@@ -8,10 +8,6 @@ public record Distance(double meter) {
         return new Distance(meter);
     }
 
-    static Distance kilometer(double kilometer) {
-        return new Distance(kilometer * 1000);
-    }
-
     public Distance plus(Distance other) {
         return meter(this.meter + other.meter);
     }
@@ -27,4 +23,5 @@ public record Distance(double meter) {
     public double km() {
         return meter / 1000;
     }
+
 }
