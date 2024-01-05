@@ -1,5 +1,6 @@
 package org.mletkin.running.util;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -31,6 +32,19 @@ public class Util {
         return xgc == null //
                 ? null
                 : xgc.toGregorianCalendar().toZonedDateTime().toLocalDateTime();
+    }
+
+    public static int compare(LocalDate a, LocalDate b) {
+        if (a == null || b == null) {
+            return b != null ? 1 : a != null ? -1 : 0;
+        }
+        if (a.isBefore(b)) {
+            return 1;
+        }
+        if (b.isBefore(a)) {
+            return -1;
+        }
+        return 0;
     }
 
 }

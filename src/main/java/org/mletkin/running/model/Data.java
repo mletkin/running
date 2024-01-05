@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +32,7 @@ public class Data {
     public Data(Path source) {
         content = files(source) //
                 .map(new XmlRead()::data) //
+                .filter(Objects::nonNull) //
                 .map(TrainingCenterDatabaseT::getActivities) //
                 .map(ActivityListT::getActivity) //
                 .flatMap(List::stream) //
@@ -41,7 +43,7 @@ public class Data {
     private Stream<Path> files(Path path) {
         try {
             if (Files.isDirectory(path)) {
-                return Files.find(path, 2, this::match);
+                return Files.find(path, 3, this::match);
             }
             if (Files.isRegularFile(path)) {
                 return Stream.of(path);

@@ -65,6 +65,15 @@ public class Session {
     }
 
     /**
+     * Returns the number of laps in the session.
+     *
+     * @return number of laps
+     */
+    public int lapCount() {
+        return laps.size();
+    }
+
+    /**
      * Returns the running time of the session.
      *
      * @return Accumulated lap running times.

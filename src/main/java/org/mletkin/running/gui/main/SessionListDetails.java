@@ -1,5 +1,6 @@
 package org.mletkin.running.gui.main;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -9,17 +10,20 @@ import org.mletkin.running.model.Data;
 import org.mletkin.running.model.Distance;
 import org.mletkin.running.model.Lap;
 import org.mletkin.running.model.Session;
+import org.mletkin.running.model.Speed;
 import org.mletkin.running.util.Format;
 
 import javafx.scene.control.TextArea;
 
 /**
- * {@code Node} with detailed data for activities in a range.
+ * Displays detail data for a session list.
  */
-public class RangeDetails extends TextArea {
+public class SessionListDetails extends TextArea {
 
     private Data data;
     private Function<Session, Session> convert = new Normalizer()::norm;
+    private List<Session> sessions;
+    private String text;
 
     /**
      * Creates a detail pane.
@@ -27,7 +31,7 @@ public class RangeDetails extends TextArea {
      * @param data
      *                 Running data to select from
      */
-    public RangeDetails(Data data) {
+    public SessionListDetails(Data data) {
         this.data = data;
     }
 
@@ -38,15 +42,20 @@ public class RangeDetails extends TextArea {
      *                  time range
      */
     public void setRange(Range range) {
-        var runs = data.runs().filter(range::filter).collect(Collectors.toList());
+        sessions = data.runs().filter(range::filter).collect(Collectors.toList());
+        text = range.txt();
+        render();
+    }
+
+    private void render() {
         var sum = new Summarizer();
-        runs.stream().map(convert).forEach(sum::add);
+        sessions.stream().map(convert).forEach(sum::add);
 
         clear();
         if (sum.runs() > 0) {
-            add(range.txt());
+            add(text);
             if (sum.runs() == 1) {
-                add(String.format("Start: %s", Format.time(runs.getFirst().start())));
+                add(String.format("Start: %s", Format.time(sessions.getFirst().start())));
             } else {
                 add(String.format("Runs: %d", sum.runs()));
             }
@@ -54,21 +63,20 @@ public class RangeDetails extends TextArea {
             add(String.format("Time: %s", Format.time(sum.time())));
             add(String.format("Laps: %d", sum.laps()));
             add(String.format("Alt:  %.2f m", //
-                    runs.stream().flatMap(Session::laps) //
+                    sessions.stream().flatMap(Session::laps) //
                             .map(Lap::deltaAlt) //
                             .reduce(Distance.ZERO, Distance::plus) //
                             .meter()));
             add("---");
-            addItional(range);
+            addRaw();
             add("---");
-            addItionalNorm(range);
+            addNorm();
         }
     }
 
-    private void addItional(Range range) {
+    private void addRaw() {
         var sum = new Summarizer();
-        data.runs() //
-                .filter(range::filter) //
+        sessions.stream() //
                 .flatMap(Session::laps) //
                 .flatMap(Lap::track) //
                 .forEach(sum::add);
@@ -76,25 +84,26 @@ public class RangeDetails extends TextArea {
         add(String.format("Dist: %.3f km", sum.dist().km()));
         add(String.format("Time: %s", Format.time(sum.time())));
         add(String.format("Alt: %.2f/%.2f m", sum.altUp().meter(), sum.altDown().meter()));
+        add(String.format("Pace: %s", Format.pace(new Speed(sum.time(), sum.dist()).pace())));
         add("---");
         var sg = new SpeedGrouper();
-        data.runs() //
-                .filter(range::filter) //
+        sessions.stream() //
                 .flatMap(Session::laps).flatMap(Lap::track) //
                 .forEach(sg::process);
 
         sg.result().map(this::format).forEach(this::add);
     }
 
-    private void addItionalNorm(Range range) {
+    private void addNorm() {
         var sum = new Summarizer();
-        data.runs().map(convert) //
-                .filter(range::filter) //
+        sessions.stream() //
+                .map(convert) //
                 .forEach(sum::add);
 
         add(String.format("Dist: %.3f km", sum.dist().km()));
         add(String.format("Time: %s", Format.time(sum.time())));
         add(String.format("Alt: %.2f/%.2f m", sum.altUp().meter(), sum.altDown().meter()));
+        add(String.format("Pace: %s", Format.pace(new Speed(sum.time(), sum.dist()).pace())));
     }
 
     private void add(String line) {

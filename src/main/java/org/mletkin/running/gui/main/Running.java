@@ -26,7 +26,7 @@ import javafx.stage.Stage;
  */
 public class Running extends Application {
     private Data data;
-    private RangeDetails details;
+    private SessionListDetails details;
     private RunChart runChart;
     private Stage primary;
 
@@ -51,7 +51,7 @@ public class Running extends Application {
     @Override
     public void start(Stage stage) {
         data = firstParameter().map(Data::new).orElseGet(Data::new);
-        details = new RangeDetails(data);
+        details = new SessionListDetails(data);
         runChart = new RunChart(data);
 
         stage.setTitle("Running");
@@ -79,7 +79,7 @@ public class Running extends Application {
 
     private MenuBar menu() {
         MenuItem[] items = { //
-                item("Read Data", a -> readData()), //
+                item("Read Data", a -> readData()) //
         };
 
         var menuBar = new MenuBar();
